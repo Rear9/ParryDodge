@@ -4,12 +4,15 @@ using UnityEngine;
 public class Actions : MonoBehaviour
 {
     private PlayerControls _controls;
+    [SerializeField] private Movement movement;
 
     private bool _parrying;
     private bool _dodging;
     [SerializeField]
     public float parryWindow;
+    public float parryFailCD;
     public float dodgeWindow;
+    public float dodgeCD;
     public float dodgeSpeed;
 
     private Rigidbody2D _rb;
@@ -32,7 +35,6 @@ public class Actions : MonoBehaviour
         _controls = new PlayerControls();
         _controls.Player.Parry.performed += ctx => StartCoroutine(Parry());
         _controls.Player.Dodge.performed += ctx => StartCoroutine(Dodge());
-
         _controls.Player.Dodge.canceled += ctx => StartCoroutine(DodgeCancel());
     }
 
@@ -44,19 +46,25 @@ public class Actions : MonoBehaviour
 
     private IEnumerator Dodge() // Player Dodge Input
     {
-        if (_dodging) { yield return null; } 
+        if (_dodging) { yield break; } 
         _dodging = true; // Prevent multiple dodges activating at once
+        Debug.Log("Dodge");
+        float originSpeed = movement.speed;
+        movement.speed += movement.speed * .3f; // temp speed set
         //logic
         yield return new WaitForSeconds(dodgeWindow);
+        movement.speed = originSpeed;
+        //reverse player invulnerability
+        yield return new WaitForSeconds(dodgeCD);
         _dodging = false;
         _dodgeCoroutine = null;
-        Debug.Log("Dodge");
     }
 
     private IEnumerator Parry() // Player Parry Input
     {
-        if (_parrying) { yield return null; }
+        if (_parrying) { yield break; }
         _parrying = true; // Prevent multiple parries activating at once
+        Debug.Log("Parry");
         bool parrySuccess = false;
         float timer = 0f; // Start timer
         while (timer < parryWindow && !parrySuccess)
@@ -68,10 +76,15 @@ public class Actions : MonoBehaviour
             }
             yield return null;
         }
-        _parrying = false;
         if (parrySuccess) {
-            Debug.Log("Parry");
+            Debug.Log("Parried"); // Parry Success
         }
+        else
+        {
+            Debug.Log("Parry CD");
+            yield return new WaitForSeconds(parryFailCD); // Counter parry spam
+        }
+        _parrying = false;
     }
 
     private IEnumerator DodgeCancel()
