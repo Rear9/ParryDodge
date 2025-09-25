@@ -17,7 +17,7 @@ public class Actions : MonoBehaviour
 
     [Header("Colours")] 
     public Color neutralColor = new Color(1, 0, 0);
-    public Color parryColor = new Color(1, .5f, 0);
+    public Color parryColor = new Color(1, .65f, 0);
     public Color dodgeColor = new Color(.3f, .6f, 1);
 
     [Header("Components")]
