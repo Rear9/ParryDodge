@@ -617,6 +617,7 @@ GameObject:
   - component: {fileID: 1306051336}
   - component: {fileID: 1306051343}
   - component: {fileID: 1306051342}
+  - component: {fileID: 1306051344}
   - component: {fileID: 1306051341}
   - component: {fileID: 1306051338}
   - component: {fileID: 1306051340}
@@ -785,14 +786,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movement: {fileID: 1306051343}
+  plrColor: {fileID: 1306051344}
   parryWindow: 0.6
   parryFailCd: 1
   dodgeWindow: 0.6
   dodgeCd: 1.5
   dodgeSpeedMult: 0.3
-  neutralColor: {r: 1, g: 0, b: 0, a: 1}
-  parryColor: {r: 1, g: 0.5, b: 0, a: 1}
-  dodgeColor: {r: 0.3, g: 0.6, b: 1, a: 1}
+  _parrying: 0
+  _parryCdActive: 0
+  _dodging: 0
+  _dodgeCdActive: 0
+  _parryHit: 0
 --- !u!114 &1306051343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -806,6 +810,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
+--- !u!114 &1306051344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306051335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b723d09c0d46b7d4c918266ccb5be25c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sr: {fileID: 1306051336}
+  neutralColor: {r: 1, g: 0, b: 0, a: 1}
+  parryColor: {r: 1, g: 0.65, b: 0, a: 1}
+  dodgeColor: {r: 0.3, g: 0.6, b: 1, a: 1}
+  colourSpeed: 0.2
 --- !u!1 &1349704201
 GameObject:
   m_ObjectHideFlags: 0
