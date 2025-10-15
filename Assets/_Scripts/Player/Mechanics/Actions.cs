@@ -18,11 +18,6 @@ public class Actions : MonoBehaviour
 
     [Header("Components")]
     private Coroutine _dodgeCoroutine;
-
-    [Header("Layers")]
-    private int _playerLayer;
-    private int _playerInvulnLayer;
-    private int _enemyAttackLayer;
     
     [Header("Debugging")]
     [SerializeField] private bool parrying;
@@ -30,7 +25,7 @@ public class Actions : MonoBehaviour
     [SerializeField] private bool dodging;
     [SerializeField] private bool dodgeCdActive = false;
     private bool _parryHit;
-    private Collider2D _collidedAttack; // for debugging
+    private Collider2D _parriedAttack; // for debugging
     void Awake()
     {
         _playerLayer =  LayerMask.NameToLayer("Player");
@@ -39,18 +34,25 @@ public class Actions : MonoBehaviour
     }
     public void StartParry()
     {
+        if (!_parrying) StartCoroutine(ParryRoutine());
+
         if (!parrying && !parryCdActive) StartCoroutine(ParryRoutine());
+
     }
     
     public void StartDodge()
     {
+        if (_dodging || _dodgeCdActive) return;
+        _dodgeCoroutine = StartCoroutine(DodgeRoutine());
+
         if (!dodging && !dodgeCdActive) _dodgeCoroutine = StartCoroutine(DodgeRoutine());
+
     }
     public void CancelDodge()
     {
         if (dodging) dodging = false;
     }
-    
+
     private IEnumerator ParryRoutine() // Player Parry Input
     {
         parrying = true; // Prevent multiple parries activating at once
@@ -70,16 +72,6 @@ public class Actions : MonoBehaviour
 
         if (_parryHit)
         {
-            parrying = false;
-            //StopAllCoroutines();
-            StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
-            _parryHit = false;
-            yield break;
-        }
-        
-        parrying = false;
-        StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
-        parryCdActive = true;
             Debug.Log("Parried " + _parriedAttack.name);
             // parry logic + visuals
         }
@@ -95,16 +87,38 @@ public class Actions : MonoBehaviour
         
         parrying = false;
         gameObject.layer = originLayer;
+
+            parrying = false;
+            //StopAllCoroutines();
+            StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
+            _parryHit = false;
+            gameObject.layer = LayerMask.NameToLayer("Player");
+            yield break;
+        }
+        parrying = false;
+        gameObject.layer = LayerMask.NameToLayer("Player");
+
         StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
         parryCdActive = true;
         yield return new WaitForSeconds(parryFailCd); // Counter parry spam
         parryCdActive = false;
     }
+
+    public void ParrySuccess()
+    {
+        _parryHit = true;
+    }
+
     private IEnumerator DodgeRoutine() // Player Dodge Input
     {
+        _dodging = true; // Prevent multiple dodges activating at once, start of player invulnerability
+        gameObject.layer = _playerInvulnLayer;
+        StartCoroutine(SpriteColor(_sr.color, dodgeColor)); // Lerp player sprite colour  (TO PUSH OUT)
+
         dodging = true; // Prevent multiple dodges activating at once, start of player invulnerability
         gameObject.layer = _playerInvulnLayer;
         StartCoroutine(plrColor.ColorSprite(plrColor.dodgeColor));
+
         
         var originalSpeed = movement.speed;
         movement.speed += movement.speed * dodgeSpeedMult; // Increase player speed on dodge
@@ -117,9 +131,14 @@ public class Actions : MonoBehaviour
         }
         
         movement.speed = originalSpeed; // Decrease player speed once outside of dodge window
+        StartCoroutine(SpriteColor(_sr.color, neutralColor)); // Return player sprite colour to original  (TO PUSH OUT)
+        _dodging = false; // end of player invulnerability
+        gameObject.layer = _playerLayer;
+
         StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
         dodging = false; // end of player invulnerability
-        gameObject.layer = _playerLayer;
+        gameObject.layer = LayerMask.NameToLayer("Player");
+
         
         dodgeCdActive = true; // start dodge cooldown
         yield return new WaitForSeconds(dodgeCd);
