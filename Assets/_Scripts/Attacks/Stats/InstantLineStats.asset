@@ -16,5 +16,5 @@ MonoBehaviour:
   damage: 1
   lifetime: 2
   parryable: 1
-  attackSpeed: 100
+  attackSpeed: 70
   attackColor: {r: 0, g: 0, b: 0, a: 1}

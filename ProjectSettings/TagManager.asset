@@ -8,7 +8,6 @@ TagManager:
   - ReflectiveAttack
   - ExplosiveAttack
   - NeutralAttack
-
   layers:
   - Default
   - TransparentFX
