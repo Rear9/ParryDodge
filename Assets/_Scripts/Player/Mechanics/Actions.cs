@@ -55,6 +55,9 @@ public class Actions : MonoBehaviour
     {
         parrying = true; // Prevent multiple parries activating at once
         _parryHit = false;
+
+        int originLayer = gameObject.layer;
+        gameObject.layer = LayerMask.NameToLayer("PlayerParry");
         
         StartCoroutine(plrColor.ColorSprite(plrColor.parryColor));
         
@@ -75,6 +78,23 @@ public class Actions : MonoBehaviour
         }
         
         parrying = false;
+        StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
+        parryCdActive = true;
+            Debug.Log("Parried " + _parriedAttack.name);
+            // parry logic + visuals
+        }
+        
+        StartCoroutine(SpriteColor(_sr.color, neutralColor)); // Return player sprite colour to original  (TO PUSH OUT)
+            parrying = false;
+            gameObject.layer = originLayer;
+            //StopAllCoroutines();
+            StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
+            _parryHit = false;
+            yield break;
+        }
+        
+        parrying = false;
+        gameObject.layer = originLayer;
         StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
         parryCdActive = true;
         yield return new WaitForSeconds(parryFailCd); // Counter parry spam
