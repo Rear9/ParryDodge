@@ -170,9 +170,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
 --- !u!1 &64140570
 GameObject:
   m_ObjectHideFlags: 0
@@ -185,6 +182,7 @@ GameObject:
   - component: {fileID: 64140572}
   - component: {fileID: 64140571}
   m_Layer: 7
+  m_Name: LineAttack
   m_Name: LineAttackTemp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -307,9 +305,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 --- !u!1 &73372699
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,7 +339,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 9.999983, y: 64.9501}
+  m_AnchoredPosition: {x: 9.999983, y: 80}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &73372701
@@ -367,7 +362,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: still placeholding :)
+  m_text: "(\u2310\u25A0_\u25A0)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5ed86559efa97a24686b884b2ae59be6, type: 2}
   m_sharedMaterial: {fileID: -3884857614528661167, guid: 5ed86559efa97a24686b884b2ae59be6, type: 2}
@@ -1017,6 +1012,7 @@ GameObject:
   - component: {fileID: 1306051336}
   - component: {fileID: 1306051343}
   - component: {fileID: 1306051342}
+  - component: {fileID: 1306051344}
   - component: {fileID: 1306051341}
   - component: {fileID: 1306051338}
   - component: {fileID: 1306051340}
@@ -1091,7 +1087,7 @@ Transform:
   m_GameObject: {fileID: 1306051335}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.1, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.75}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -1185,14 +1181,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movement: {fileID: 1306051343}
+  plrColor: {fileID: 1306051344}
   parryWindow: 0.6
   parryFailCd: 1
   dodgeWindow: 0.6
   dodgeCd: 1.5
   dodgeSpeedMult: 0.3
-  neutralColor: {r: 1, g: 0, b: 0, a: 1}
-  parryColor: {r: 1, g: 0.5, b: 0, a: 1}
-  dodgeColor: {r: 0.3, g: 0.6, b: 1, a: 1}
+  parrying: 0
+  parryCdActive: 0
+  dodging: 0
+  dodgeCdActive: 0
 --- !u!114 &1306051343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1206,6 +1204,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
+--- !u!114 &1306051344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306051335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b723d09c0d46b7d4c918266ccb5be25c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  neutralColor: {r: 1, g: 0, b: 0, a: 1}
+  parryColor: {r: 1, g: 0.65, b: 0, a: 1}
+  dodgeColor: {r: 0.3, g: 0.6, b: 1, a: 1}
+  sr: {fileID: 1306051336}
+  colourSpeed: 0.2
 --- !u!1 &1349704201
 GameObject:
   m_ObjectHideFlags: 0
@@ -1432,11 +1447,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2512639723430441938, guid: 73327d88d926e8b4bab61d0e1f41c084, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.01614
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2512639723430441938, guid: 73327d88d926e8b4bab61d0e1f41c084, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.19721
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2512639723430441938, guid: 73327d88d926e8b4bab61d0e1f41c084, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1536,9 +1551,7 @@ SceneRoots:
   - {fileID: 104410170}
   - {fileID: 1306051337}
   - {fileID: 448469600}
-<<<<<<< Updated upstream
-=======
   - {fileID: 630238588}
   - {fileID: 826903503}
   - {fileID: 999652795}
->>>>>>> Stashed changes
+  - {fileID: 64140573}
