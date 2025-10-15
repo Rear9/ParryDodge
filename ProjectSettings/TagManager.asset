@@ -3,7 +3,15 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
+<<<<<<< Updated upstream
   tags: []
+=======
+  tags:
+  - DestructibleAttack
+  - ReflectiveAttack
+  - ExplosiveAttack
+  - NeutralAttack
+>>>>>>> Stashed changes
   layers:
   - Default
   - TransparentFX
@@ -12,7 +20,7 @@ TagManager:
   - Water
   - UI
   - PlayerParry
-  - PlayerInvuln
+  - PlayerDodge
   - EnemyAttack
   - Wall
   - 
