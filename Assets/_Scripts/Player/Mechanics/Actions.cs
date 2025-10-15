@@ -78,20 +78,12 @@ public class Actions : MonoBehaviour
         }
         
         parrying = false;
+        gameObject.layer = originLayer;
+        //StopAllCoroutines();
         StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
-        parryCdActive = true;
-            Debug.Log("Parried " + _parriedAttack.name);
-            // parry logic + visuals
-        }
+        _parryHit = false;
+        yield break;
         
-        StartCoroutine(SpriteColor(_sr.color, neutralColor)); // Return player sprite colour to original  (TO PUSH OUT)
-            parrying = false;
-            gameObject.layer = originLayer;
-            //StopAllCoroutines();
-            StartCoroutine(plrColor.ColorSprite(plrColor.neutralColor));
-            _parryHit = false;
-            yield break;
-        }
         
         parrying = false;
         gameObject.layer = originLayer;
@@ -125,31 +117,5 @@ public class Actions : MonoBehaviour
         yield return new WaitForSeconds(dodgeCd);
         dodgeCdActive = false;
         _dodgeCoroutine = null; // reset coroutine and stop dodge cooldown
-    }
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.layer != _enemyAttackLayer) return; // Check if collided with attack
-        _collidedAttack = other;
-        if (parrying)
-        {
-            _parryHit = true;
-            Debug.Log("Parried " + other.name);
-        }
-
-        if (dodging)
-        {
-            Debug.Log("Dodged " + other.name);
-        }
-        if (!parrying && !dodging && !_parryHit)
-        {
-            Debug.Log("Player hit by " + other.name);
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (!_parryHit || other.gameObject.layer != _enemyAttackLayer) return;
-        parrying = false;
-        parryCdActive = false;
     }
 }
