@@ -13,68 +13,60 @@ public class AttackPoolManager : MonoBehaviour
         public int initialSize = 5;
     }
 
-    [SerializeField] private List<Pool> pools = new List<Pool>();
-    private readonly Dictionary<string, Queue<GameObject>> _poolDict = new Dictionary<string, Queue<GameObject>>();
+    [SerializeField] private List<Pool> pools = new();
+    private readonly Dictionary<string, Queue<GameObject>> _poolDict = new();
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        // Initialize each pool
+        
         foreach (var pool in pools)
         {
-            Queue<GameObject> objectPool = new Queue<GameObject>();
+            var objectPool = new Queue<GameObject>();
 
             for (int i = 0; i < pool.initialSize; i++)
             {
-                GameObject obj = Instantiate(pool.prefab);
+                var obj = Instantiate(pool.prefab, Vector3.zero, Quaternion.identity, null);
+                obj.transform.SetParent(null); // make sure it's not parented under manager
                 obj.SetActive(false);
                 objectPool.Enqueue(obj);
             }
-
-            _poolDict.Add(pool.key, objectPool);
+            _poolDict[pool.key] = objectPool;
         }
     }
 
-    public GameObject SpawnFromPool(string key, Vector3 position, Quaternion rotation)
+    public GameObject SpawnFromPool(string key, Vector3 pos, Quaternion rot)
     {
-        if (_poolDict[key].Count == 0)
+        if (!_poolDict.TryGetValue(key, out var queue) || queue.Count == 0)
         {
-            Debug.LogWarning($"Pool '{key}' is empty, make sure objects are being returned to the pool.");
+            Debug.LogWarning($"{key} is empty");
             return null;
         }
         
-        GameObject objectToSpawn = _poolDict[key].Dequeue();
-        
-        if (objectToSpawn.TryGetComponent(out Rigidbody2D rb))
+        var spawnObj = _poolDict[key].Dequeue();
+        spawnObj.transform.SetParent(null);
+        if (spawnObj.TryGetComponent(out Rigidbody2D rb))
         {
-            rb.position = position;
-            rb.rotation = rotation.eulerAngles.z;
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
+            rb.position = pos;
+            rb.rotation = rot.eulerAngles.z;
         }
-        
-        objectToSpawn.transform.SetPositionAndRotation(position,rotation);
-        objectToSpawn.SetActive(true);
-        return objectToSpawn;
+        spawnObj.transform.SetPositionAndRotation(pos,rot);
+        spawnObj.SetActive(true);
+        return spawnObj;
     }
 
     public void ReturnToPool(string key, GameObject obj)
     {
-        obj.SetActive(false);
-        if (_poolDict.TryGetValue(key, out var value))
-        {
-            value.Enqueue(obj);
-        }
-        else
+        if (!_poolDict.TryGetValue(key, out var val))
         {
             Destroy(obj); // fallback
         }
+
+        obj.SetActive(false);
+        val.Enqueue(obj);
     }
 }

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackName: Instant Line
   damage: 1
-  lifetime: 2
+  lifetime: 2.5
   parryable: 1
-  attackSpeed: 70
-  attackColor: {r: 0, g: 0, b: 0, a: 1}
+  attackSpeed: 40
+  attackColor: {r: 0.8301887, g: 0, b: 0.05924117, a: 1}

@@ -7,67 +7,63 @@ public abstract class EnemyAttackCore : MonoBehaviour
     [SerializeField] protected AttackStats stats;
 
     protected Rigidbody2D _rb;
-    protected Collider2D _col;
     protected bool _active = true;
     private string _poolKey;
-    protected virtual void Awake()
-    {
-        _rb = GetComponent<Rigidbody2D>();
-        _col = GetComponent<Collider2D>();
-    }
-
-    protected virtual void OnEnable()
-    {
-        _active = true;
-    }
     
+    protected virtual void Awake() => _rb = GetComponent<Rigidbody2D>();
+    protected virtual void OnEnable() => _active = true;
     protected virtual void OnDisable()
     {
-        // Cancel any pending invokes when returned to pool
-        CancelInvoke(nameof(ReturnToPool));
+        _active = false;
+        CancelInvoke();
+        StopAllCoroutines();
     }
-    
     public void SetPoolKey(string key)
     {
         _poolKey = key;
-
-        if (stats != null && stats.lifetime > 0)
+        if (stats?.lifetime > 0)
         {
             Invoke(nameof(ReturnToPool), stats.lifetime);
         }
     }
-
     protected void OnTriggerEnter2D(Collider2D other)
     {
         if (!_active) return;
-        if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
+
+        int layer = other.gameObject.layer;
+        if (layer == LayerMask.NameToLayer("Player")) // if player isn't performing an action
         {
             Debug.Log("Hit");
             ReturnToPool();
-            // damage the player
+            // dmg player from a health manager
         }
-        else if (other.gameObject.layer == LayerMask.NameToLayer("PlayerParry") && stats.parryable)
+        else if (layer == LayerMask.NameToLayer("PlayerParry")) // if parrying an attack that can be parried
         {
             // parry the attack if parryable, refresh player parry cooldown
-            if (other.TryGetComponent(out Actions plrActions))
+            if (stats.parryable && other.TryGetComponent(out Actions plrActions))
             {
                 plrActions.ParrySuccess();
+                OnParried(other.transform);
             }
-
-            OnParried(other.transform);
-            Debug.Log("Parry");
+            else ReturnToPool();
         }
     }
-    
     private void ReturnToPool()
     {
         _active = false;
         StopAllCoroutines();
-        if (TryGetComponent(out Rigidbody2D rb)) rb.linearVelocity = Vector2.zero; rb.angularVelocity = 0f;
-        
-        AttackPoolManager.Instance.ReturnToPool(_poolKey, gameObject);
-    }
 
+        if (_rb)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            _rb.angularVelocity = 0f;
+        }
+        
+        if(!string.IsNullOrEmpty(_poolKey))
+        {
+            AttackPoolManager.Instance.ReturnToPool(_poolKey,gameObject);
+        }
+    }
     protected virtual void OnParried(Transform parrySource)
     {
         ReturnToPool();

@@ -4,23 +4,30 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class InstantLineAttack : EnemyAttackCore
+public class InstantLineAttack : EnemyAttackCore, IEnemyAttack // inherit from core and attack interface
 {
     [Header("Overrides")] 
-    [SerializeField] private float chargeTime = -1f;
+    [SerializeField] private float chargeTime = 1f;
     [SerializeField] private SpriteRenderer sr;
+    [SerializeField] private Transform traceTransform;
+    [SerializeField] private float maxTraceLength = 100f;
+    [SerializeField] private Color pulseColor = Color.white;
     
     private Transform _player;
     private bool _moving;
     private float _speed;
     private Vector2 _moveDir;
+    private Vector2 _originScale;
+    private Vector2 _originPos;
     private Color _baseColor;
-    private readonly Color _pulseColor = Color.white;
 
     protected override void Awake()
     {
         base.Awake();
-        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        _originPos = sr.transform.localPosition;
+        _originScale = sr.transform.localScale;
+        traceTransform = sr.transform;
+        
         _baseColor = sr.color;
     }
     
@@ -30,41 +37,60 @@ public class InstantLineAttack : EnemyAttackCore
         if (_player == null) return;
 
         StopAllCoroutines();
+        sr.color = _baseColor; // reset visual
+        SetTraceScale(0.1f);
         _moving = false;
         _active = false;
-        sr.color = _baseColor; // Reset visual
         
-        // Rotate toward player
+        // rotate towards player
         Vector2 dir = (_player.position - transform.position).normalized;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        var angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angle - 90);
-
         _moveDir = transform.up;
 
-        // Start behaviour
-        StartCoroutine(Attack());
+        // start attack sequence
+        StartCoroutine(AttackSequence());
     }
 
-    private IEnumerator Attack()
+    private void SetTraceScale(float length)
+    {
+        // Scale only in Y direction
+        traceTransform.localScale = new Vector2(_originScale.x, length);
+        
+        // Offset position so it grows forward only
+        // Assumes tracer points up (positive Y)
+        traceTransform.localPosition = new Vector3(
+            _originPos.x,
+            _originPos.y + (length * 0.5f) // Move up by half the scale
+        );
+    }
+    
+    private IEnumerator AttackSequence()
     {
         _active = false;
+        
         if (chargeTime > 0)
         {
             float timer = 0f;
-            float pulseSpeed = 2f;
-            while (timer < chargeTime)
+            while (timer < chargeTime) // color telegraph with ping-pong lerp
             {
-                float t = Mathf.PingPong(Time.time * pulseSpeed, 1f);
-                sr.color = Color.Lerp(_baseColor, _pulseColor, t);
+                float progress = timer / chargeTime;
+                
+                // Scale the tracer length over time
+                float currentLength = Mathf.Lerp(0.1f, maxTraceLength, progress);
+                SetTraceScale(currentLength);
+                
+                float t = Mathf.PingPong(timer * 2f, 1f);
+                sr.color = Color.Lerp(_baseColor, pulseColor, t);
+            
                 timer += Time.deltaTime;
                 yield return null;
             }
-
         }
-
+        SetTraceScale(maxTraceLength);
         sr.color = _baseColor;
         _active = true;
-        _speed = stats != null ? stats.attackSpeed : 5f;
+        _speed = stats ? stats.attackSpeed : 5f;
         _moving = true;
     }
 
@@ -83,14 +109,5 @@ public class InstantLineAttack : EnemyAttackCore
         base.OnParried(parrySource);
         
         // Custom behaviour to replace .OnParried possible
-    }
-    
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-        _moving = false;
-        _active = false;
-        StopAllCoroutines(); // ensure no leftover behavior
-        sr.color = _baseColor;
     }
 }
