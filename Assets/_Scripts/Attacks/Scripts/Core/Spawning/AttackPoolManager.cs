@@ -15,6 +15,7 @@ public class AttackPoolManager : MonoBehaviour
 
     [SerializeField] private List<Pool> pools = new();
     private readonly Dictionary<string, Queue<GameObject>> _poolDict = new();
+    private readonly Dictionary<string, Transform> _poolParentDict = new();
 
     private void Awake()
     {
@@ -25,11 +26,13 @@ public class AttackPoolManager : MonoBehaviour
         foreach (var pool in pools)
         {
             var objectPool = new Queue<GameObject>();
-
+            GameObject folder = new GameObject(pool.key + "_Pool");
+            folder.transform.SetParent(transform);
+            _poolParentDict[pool.key] = folder.transform;
+            
             for (int i = 0; i < pool.initialSize; i++)
             {
-                var obj = Instantiate(pool.prefab, Vector3.zero, Quaternion.identity, null);
-                obj.transform.SetParent(null); // make sure it's not parented under manager
+                var obj = Instantiate(pool.prefab, Vector3.zero, Quaternion.identity, folder.transform);
                 obj.SetActive(false);
                 objectPool.Enqueue(obj);
             }
@@ -67,6 +70,7 @@ public class AttackPoolManager : MonoBehaviour
         }
 
         obj.SetActive(false);
+        obj.transform.SetParent(_poolParentDict[key]);
         val.Enqueue(obj);
     }
 }

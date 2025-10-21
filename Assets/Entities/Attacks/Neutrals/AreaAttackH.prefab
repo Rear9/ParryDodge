@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 5704565177096413013}
   - component: {fileID: 7404942075204193715}
   - component: {fileID: 1252194564421617889}
+  - component: {fileID: -7334184977618753816}
   m_Layer: 0
-  m_Name: AreaAttack
+  m_Name: AreaAttackH
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +79,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: b3f496c70e0c2f948a489633cb54ad6a, type: 3}
-  m_Color: {r: 0.2688679, g: 0.41641933, b: 1, a: 1}
+  m_Color: {r: 0.2688679, g: 0.41641933, b: 1, a: 0.19607843}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -134,3 +135,21 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.3, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &-7334184977618753816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266539263477596892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 978e86d8344841ddbbcca9351a625702, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stats: {fileID: 11400000, guid: e606109efb22c934892eeaa144034a04, type: 2}
+  sr: {fileID: 7404942075204193715}
+  pulseColor: {r: 1, g: 1, b: 1, a: 0.2}
+  fadeInDuration: 2
+  activeDuration: 1
+  fadeOutDuration: 1

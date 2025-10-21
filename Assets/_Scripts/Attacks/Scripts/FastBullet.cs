@@ -105,16 +105,16 @@ public class FastBullet : EnemyAttackCore, IEnemyAttack // inherit from core and
     protected override void OnParried(Transform parrySource)
     {
         if (!_active) return;
-
-        Debug.Log($"{stats.attackName} parried.");
-        
+        gameObject.layer = LayerMask.NameToLayer("PlayerAttack");
         if (parrySource.TryGetComponent(out Collider2D parryCollider))
         {
-            Vector2 contactPoint = parryCollider.ClosestPoint(transform.position);
-            Vector2 reflectDir = ((Vector2)transform.position - contactPoint).normalized;
-            
+            var reflectDir = ((Vector2)transform.position - parryCollider.ClosestPoint(transform.position)).normalized;
             if (reflectDir.sqrMagnitude < 0.01f)
-                reflectDir = Vector2.up;
+            {
+                var randomAngle = UnityEngine.Random.Range(0f, 360f);
+                reflectDir = new Vector2(Mathf.Cos(randomAngle * Mathf.Deg2Rad), Mathf.Sin(randomAngle * Mathf.Deg2Rad));
+            }
+                
 
             _moveDir = reflectDir;
             
@@ -124,8 +124,5 @@ public class FastBullet : EnemyAttackCore, IEnemyAttack // inherit from core and
             _moving = true;
             _active = true;
         }
-
-        // Do NOT call base.OnParried() to avoid despawning
-        Debug.Log($"{stats.attackName} reflected.");
     }
 }

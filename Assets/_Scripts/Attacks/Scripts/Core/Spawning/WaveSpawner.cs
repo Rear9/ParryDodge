@@ -30,7 +30,7 @@ public class WaveSpawner : MonoBehaviour
     public List<Wave> waves = new();
     private Transform _lastSpawn;
     
-    private void Start() { StartCoroutine(WaveRoutine()); }
+    private void OnEnable() { StartCoroutine(WaveRoutine()); }
     
     private IEnumerator WaveRoutine()
     {
@@ -51,12 +51,11 @@ public class WaveSpawner : MonoBehaviour
 
             yield return new WaitForSeconds(wave.waveDelay);
         }
-        Debug.Log("Waves complete");
+        Debug.Log("Waves complete.");
     }
     private void SpawnAttack(WaveEntry entry)
     {
         if (waves.Count == 0 || spawnPoints.Length == 0) return;
-        Debug.Log($"Waves active: {waves.Count}");
 
         Transform spawn = entry.spawnPoint != null ? entry.spawnPoint : GetRandomSpawnPoint();
         GameObject attackObj = AttackPoolManager.Instance.SpawnFromPool(entry.attackName, spawn.position, Quaternion.identity);
@@ -77,7 +76,6 @@ public class WaveSpawner : MonoBehaviour
     {
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
-            Debug.LogError("No spawn points assigned in WaveSpawner!");
             return transform; // fallback to self
         }
 
@@ -87,7 +85,6 @@ public class WaveSpawner : MonoBehaviour
         do
         {
             spawn = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            print(spawn);
         } while (spawn == _lastSpawn);
     
         _lastSpawn = spawn;

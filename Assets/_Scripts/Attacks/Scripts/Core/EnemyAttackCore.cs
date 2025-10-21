@@ -31,22 +31,23 @@ public abstract class EnemyAttackCore : MonoBehaviour
         if (!_active) return;
 
         int layer = other.gameObject.layer;
-        if (layer == LayerMask.NameToLayer("Player")) // if player isn't performing an action
-        {
-            Debug.Log("Hit");
-            // dmg player from a health manager
-        }
-        else if (layer == LayerMask.NameToLayer("PlayerParry")) // if parrying an attack that can be parried
+        if (layer == LayerMask.NameToLayer("PlayerParry")) // if parrying an attack that can be parried
         {
             // parry the attack if parryable, refresh player parry cooldown
             if (!stats.parryable || !other.TryGetComponent(out Actions plrActions)) return;
             plrActions.ParrySuccess();
             OnParried(other.transform);
         }
+        else if (layer == LayerMask.NameToLayer("Player") && gameObject.layer != LayerMask.NameToLayer("PlayerAttack")) // if player isn't performing an action
+        {
+            Debug.Log("Hit");
+            // dmg player from a health manager
+        }
     }
     protected void ReturnToPool()
     {
         _active = false;
+        gameObject.layer = LayerMask.NameToLayer("EnemyAttack");
         StopAllCoroutines();
 
         if (_rb)

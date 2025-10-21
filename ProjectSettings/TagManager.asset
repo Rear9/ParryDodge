@@ -18,8 +18,8 @@ TagManager:
   - PlayerParry
   - PlayerDodge
   - EnemyAttack
+  - PlayerAttack
   - Wall
-  - 
   - 
   - 
   - 
