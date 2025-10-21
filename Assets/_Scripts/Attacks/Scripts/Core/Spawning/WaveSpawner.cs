@@ -17,6 +17,7 @@ public class WaveEntry // variables for each assignable attack
     public string attackName;
     public int attackCount = 1;
     public float attackDelay = 0.5f;
+    public Transform spawnPoint;
 }
 
 public class WaveSpawner : MonoBehaviour
@@ -43,7 +44,7 @@ public class WaveSpawner : MonoBehaviour
             {
                 for (int i = 0; i < entry.attackCount; i++)
                 {
-                    SpawnAttack(entry.attackName);
+                    SpawnAttack(entry);
                     yield return new WaitForSeconds(entry.attackDelay);
                 }
             }
@@ -52,18 +53,18 @@ public class WaveSpawner : MonoBehaviour
         }
         Debug.Log("Waves complete");
     }
-    private void SpawnAttack(string attackKey)
+    private void SpawnAttack(WaveEntry entry)
     {
         if (waves.Count == 0 || spawnPoints.Length == 0) return;
         Debug.Log($"Waves active: {waves.Count}");
-        
-        Transform spawn = GetRandomSpawnPoint();
-        GameObject attackObj = AttackPoolManager.Instance.SpawnFromPool(attackKey, spawn.position, Quaternion.identity);
+
+        Transform spawn = entry.spawnPoint != null ? entry.spawnPoint : GetRandomSpawnPoint();
+        GameObject attackObj = AttackPoolManager.Instance.SpawnFromPool(entry.attackName, spawn.position, Quaternion.identity);
         if (!attackObj) return;
         
         if (attackObj.TryGetComponent(out EnemyAttackCore core))
         {
-            core.SetPoolKey(attackKey);
+            core.SetPoolKey(entry.attackName);
         }
         
         if (attackObj.TryGetComponent(out IEnemyAttack attack))

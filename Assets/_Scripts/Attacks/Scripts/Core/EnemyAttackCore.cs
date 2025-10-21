@@ -26,7 +26,7 @@ public abstract class EnemyAttackCore : MonoBehaviour
             Invoke(nameof(ReturnToPool), stats.lifetime);
         }
     }
-    protected void OnTriggerEnter2D(Collider2D other)
+    protected virtual void OnTriggerEnter2D(Collider2D other)
     {
         if (!_active) return;
 
@@ -34,21 +34,17 @@ public abstract class EnemyAttackCore : MonoBehaviour
         if (layer == LayerMask.NameToLayer("Player")) // if player isn't performing an action
         {
             Debug.Log("Hit");
-            ReturnToPool();
             // dmg player from a health manager
         }
         else if (layer == LayerMask.NameToLayer("PlayerParry")) // if parrying an attack that can be parried
         {
             // parry the attack if parryable, refresh player parry cooldown
-            if (stats.parryable && other.TryGetComponent(out Actions plrActions))
-            {
-                plrActions.ParrySuccess();
-                OnParried(other.transform);
-            }
-            else ReturnToPool();
+            if (!stats.parryable || !other.TryGetComponent(out Actions plrActions)) return;
+            plrActions.ParrySuccess();
+            OnParried(other.transform);
         }
     }
-    private void ReturnToPool()
+    protected void ReturnToPool()
     {
         _active = false;
         StopAllCoroutines();

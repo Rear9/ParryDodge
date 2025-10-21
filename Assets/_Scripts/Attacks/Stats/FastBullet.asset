@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba1e20e687af44a4c8ab238646a7dca9, type: 3}
-  m_Name: InstantLineStats
+  m_Name: FastBullet
   m_EditorClassIdentifier: 
   attackName: Instant Line
   damage: 1
-  lifetime: 2.5
+  lifetime: 2
   parryable: 1
-  attackSpeed: 40
+  attackSpeed: 50
   attackColor: {r: 0.8301887, g: 0, b: 0.05924117, a: 1}

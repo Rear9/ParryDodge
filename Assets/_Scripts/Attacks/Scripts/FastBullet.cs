@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class InstantLineAttack : EnemyAttackCore, IEnemyAttack // inherit from core and attack interface
+public class FastBullet : EnemyAttackCore, IEnemyAttack // inherit from core and attack interface
 {
     [Header("Overrides")] 
     [SerializeField] private float chargeTime = 1f;
@@ -104,10 +104,28 @@ public class InstantLineAttack : EnemyAttackCore, IEnemyAttack // inherit from c
     
     protected override void OnParried(Transform parrySource)
     {
-        _moving = false;
+        if (!_active) return;
+
         Debug.Log($"{stats.attackName} parried.");
-        base.OnParried(parrySource);
         
-        // Custom behaviour to replace .OnParried possible
+        if (parrySource.TryGetComponent(out Collider2D parryCollider))
+        {
+            Vector2 contactPoint = parryCollider.ClosestPoint(transform.position);
+            Vector2 reflectDir = ((Vector2)transform.position - contactPoint).normalized;
+            
+            if (reflectDir.sqrMagnitude < 0.01f)
+                reflectDir = Vector2.up;
+
+            _moveDir = reflectDir;
+            
+            float angle = Mathf.Atan2(_moveDir.y, _moveDir.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle - 90);
+
+            _moving = true;
+            _active = true;
+        }
+
+        // Do NOT call base.OnParried() to avoid despawning
+        Debug.Log($"{stats.attackName} reflected.");
     }
 }
