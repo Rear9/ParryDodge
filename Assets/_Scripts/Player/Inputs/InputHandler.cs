@@ -40,7 +40,11 @@ public class InputHandler : MonoBehaviour
             if (_allowParry)
             {
                 _actions.StartParry();
-                OnParryPressed?.Invoke(); 
+                OnParryPressed?.Invoke();
+                if (StatsManager.Instance != null)
+                {
+                    StatsManager.Instance.RecordParry();
+                }
             }
         };
         _controls.Player.Dodge.performed += ctx =>
@@ -49,6 +53,10 @@ public class InputHandler : MonoBehaviour
             {
                 _actions.StartDodge();
                 OnDodgePressed?.Invoke();
+                if (StatsManager.Instance != null)
+                {
+                    StatsManager.Instance.RecordDodge();
+                }
             }
         };
         _controls.Player.Dodge.canceled += ctx =>

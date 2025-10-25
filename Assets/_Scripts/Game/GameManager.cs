@@ -30,10 +30,16 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         SceneManager.LoadScene("Level1");
+        Cursor.visible = false;
     }
 
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    public void ReturnToMenu()
+    {
+        SceneManager.LoadScene("Menu");
     }
 }

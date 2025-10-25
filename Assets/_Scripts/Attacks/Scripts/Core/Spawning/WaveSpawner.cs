@@ -30,16 +30,16 @@ public class WaveSpawner : MonoBehaviour
     public List<Wave> waves = new();
     private Transform _lastSpawn;
     
-    private void OnEnable() { StartCoroutine(WaveRoutine()); }
+    private void OnEnable() { StartCoroutine(WaveRoutine());  }
     
-    private IEnumerator WaveRoutine()
+    private IEnumerator WaveRoutine() // main loop
     {
         yield return new WaitForSeconds(waveStartDelay);
-
+        UIManager _ui = FindFirstObjectByType<UIManager>();
         foreach (var wave in waves)
         {
             Debug.Log($"Wave: {wave.waveName}");
-
+            _ui.UpdateWaveName(wave.waveName);
             foreach (var entry in wave.waveAttacks)
             {
                 for (int i = 0; i < entry.attackCount; i++)
@@ -51,9 +51,12 @@ public class WaveSpawner : MonoBehaviour
 
             yield return new WaitForSeconds(wave.waveDelay);
         }
-        Debug.Log("Waves complete.");
+        // waves done
+        _ui.UpdateWaveName("COMPLETE");
+        yield return new WaitForSeconds(3f);
+        GameManager.Instance.ReturnToMenu();
     }
-    private void SpawnAttack(WaveEntry entry)
+    private void SpawnAttack(WaveEntry entry) // attack spawning
     {
         if (waves.Count == 0 || spawnPoints.Length == 0) return;
 
@@ -72,11 +75,11 @@ public class WaveSpawner : MonoBehaviour
         }
     }
     
-    private Transform GetRandomSpawnPoint()
+    private Transform GetRandomSpawnPoint() // generating random seed/spawn for attacks
     {
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
-            return transform; // fallback to self
+            return transform; // fallback
         }
 
         if (spawnPoints.Length == 1) return spawnPoints[0];

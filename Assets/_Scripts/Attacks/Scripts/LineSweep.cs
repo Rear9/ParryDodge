@@ -28,20 +28,24 @@ public class LineSweep : EnemyAttackCore, IEnemyAttack
 
     protected override void OnTriggerEnter2D(Collider2D other)
     {
-        if (!_active) return;
+        if (!_active && !_playerHit) return;
 
         int layer = other.gameObject.layer;
-        if (layer == LayerMask.NameToLayer("Player")) // if player isn't performing an action
+        if (layer == LayerMask.NameToLayer("Player") || layer == LayerMask.NameToLayer("PlayerParry")) // if player isn't performing an action or parrying
         {
-            Debug.Log("Hit");
-            // dmg player from a health manager
+            if(_playerHit) return;
+            _playerHit = true;
+            if (other.TryGetComponent(out PlayerHealth health))
+            {
+                health.TakeDamage(stats.damage > 0f ? stats.damage : 1f);
+            }
         }
         
-        // Ignore self-collisions with other SweepAttacks or Neutrals
+        // ignore self-collisions and other neutrals
         if (CompareTag("NeutralAttack")) return;
         
+        // destroy destructible and explosive attacks
         string otherTag = other.tag;
-        // Destroy destructible and explosive attacks
         if (otherTag == "DestructibleAttack" || otherTag == "ExplosiveAttack")
         {
             if (other.TryGetComponent(out EnemyAttackCore attack))
