@@ -1,6 +1,6 @@
 # ParryDodge
 
-**2D Action Arcade Bullet-hell with seeded enemy attacks + scaling** /n
+**2D Action Arcade Bullet-hell with seeded enemy attacks + scaling** \n
 **Itch:** _https://rear9.itch.io/parrydodge_
 
 ## **Controls** (**PC/XBOX/PS5**)
