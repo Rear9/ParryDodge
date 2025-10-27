@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 public class PlayerStats
 {
     public int totalDeaths = 0;
+    public int totalCompletions = 0;
     public string lastWaveDiedOn = "";
     public int totalParries = 0;
     public int totalDodges = 0;
@@ -71,40 +72,63 @@ public class StatsManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // --- Tutorial ---
-    public bool ShouldPlayTutorial() => !PlayerPrefs.HasKey(TutorialKey) || replayTutorial;
+    // --- tutorial ---
+    public bool ShouldPlayTutorial() => !PlayerPrefs.HasKey(TutorialKey) || replayTutorial; // use in tutorialmanager
 
-    public void CompleteTutorial()
+    public void CompleteTutorial() // use in tutorialmanager
     {
         PlayerPrefs.SetInt(TutorialKey, 1);
         PlayerPrefs.Save();
         replayTutorial = false;
     }
 
-    // --- Death tracking (local + analytics) ---
-    public void RecordDeath(string waveName)
+    // --- general stats (local + analytics) ---
+    public void RecordFull(string waveName)
     {
-        _stats.totalDeaths++;
-        _stats.lastWaveDiedOn = waveName;
         SaveLocalStats();
 
-        var deathParams = new Dictionary<string, object>
+        var parameters = new Dictionary<string, object>
         {
             { "wave_name", waveName },
             { "total_deaths", _stats.totalDeaths },
             { "total_parries", _stats.totalParries },
-            { "total_dodges", _stats.totalDodges }
+            { "total_dodges", _stats.totalDodges },
+            { "total_completions", _stats.totalCompletions }
         };
-        AnalyticsService.Instance.RecordEvent("player_death", deathParams);
-        print("Analytics log");
+        AnalyticsService.Instance.RecordEvent("player_stats", parameters);
+        foreach (var key in parameters.Keys)
+        {
+            print($"Key: {key} -  Value: {parameters[key]}");
+        }
         AnalyticsService.Instance.Flush();
 
     }
 
-    // --- Other stat increments ---
-    public void RecordParry() => _stats.totalParries++;
-    public void RecordDodge() => _stats.totalDodges++;
+    // --- stat increments ---
+    public void RecordParry()
+    {
+        _stats.totalParries++;
+        print($"Parries: {_stats.totalParries}");
+    }
 
-    // --- Utility ---
+    public void RecordDodge()
+    {
+        _stats.totalDodges++;
+        print($"Dodges: {_stats.totalDodges}");
+    }
+
+    public void RecordCompletion()
+    {
+        _stats.totalCompletions++;
+        print($"Completions: {_stats.totalCompletions}");
+    }
+
+    public void RecordDeath(string waveName)
+    {
+        _stats.totalDeaths++;
+        _stats.lastWaveDiedOn = waveName;
+        print($"Deaths: {_stats.totalDeaths}, died on wave: {waveName}");
+    }
+
     public PlayerStats GetStats() => _stats;
 }

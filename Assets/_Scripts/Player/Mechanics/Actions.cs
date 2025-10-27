@@ -61,6 +61,7 @@ public class Actions : MonoBehaviour
     }
     public void ParrySuccess()
     {
+        StatsManager.Instance.RecordParry();
         _parryHit = true;
     }
     public void StartDodge()

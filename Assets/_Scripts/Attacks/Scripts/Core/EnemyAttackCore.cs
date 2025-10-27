@@ -20,20 +20,18 @@ public abstract class EnemyAttackCore : MonoBehaviour
         StopAllCoroutines();
     }
 
-    protected virtual void
-        OnTriggerEnter2D(
-            Collider2D other) // default attack collision = if parryable, reset player parry cd && if not, hit player
+    protected virtual void OnTriggerEnter2D(Collider2D other) // default attack collision = if parryable, reset player parry cd && if not, hit player
     {
+        if (!other.TryGetComponent(out Actions plrActions)) return;
         if (!_active) return;
-
         int layer = other.gameObject.layer;
-        if (layer == LayerMask.NameToLayer("PlayerParry") &&
-            stats.parryable) // if parrying an attack that can be parried
+        if (layer == LayerMask.NameToLayer("PlayerParry") && stats.parryable) // if parrying an attack that can be parried
         {
             // parry the attack if parryable, refresh player parry cooldown
-            if (!other.TryGetComponent(out Actions plrActions)) return;
-            plrActions.ParrySuccess();
+            if (_playerHit) return;
+            _playerHit = true;
             OnParried(other.transform);
+            plrActions.ParrySuccess();
         }
         else if (layer == LayerMask.NameToLayer("Player") && gameObject.layer != LayerMask.NameToLayer("PlayerAttack")) // if player isn't performing an action
         {
@@ -54,6 +52,13 @@ public abstract class EnemyAttackCore : MonoBehaviour
                 health.TakeDamage((stats.damage > 0 ? stats.damage : 1));
             }
         }
+        else if (layer == LayerMask.NameToLayer("PlayerDodge"))
+
+        {
+            if (_playerHit) return;
+            _playerHit = true;
+            StatsManager.Instance.RecordDodge();
+        }
     }
 
     protected virtual void OnParried(Transform parrySource) // default = disappear into pool when parried
@@ -63,6 +68,7 @@ public abstract class EnemyAttackCore : MonoBehaviour
     protected void ReturnToPool() // return attack to pool & reset params
     {
         _active = false;
+        _playerHit = false;
         gameObject.layer = LayerMask.NameToLayer("EnemyAttack");
         StopAllCoroutines();
 

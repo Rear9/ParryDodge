@@ -53,6 +53,8 @@ public class WaveSpawner : MonoBehaviour
         }
         // waves done
         _ui.UpdateWaveName("COMPLETE");
+        StatsManager.Instance.RecordCompletion();
+        StatsManager.Instance.RecordFull(_ui.GetCurrentWaveName());
         yield return new WaitForSeconds(3f);
         GameManager.Instance.ReturnToMenu();
     }

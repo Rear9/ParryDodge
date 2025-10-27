@@ -161,7 +161,7 @@ public class TutorialManager : MonoBehaviour
         {
             if (img.enabled)
             {
-                StartCoroutine(FadeOutImage(img)); // Start all fades concurrently
+                StartCoroutine(FadeOutImage(img)); // start all fades concurrently
             }
         }
     }
@@ -204,7 +204,7 @@ public class TutorialManager : MonoBehaviour
         img.enabled = false;
     }
     
-    private void SpawnAttack(string attackKey, Vector3 position)
+    private void SpawnAttack(string attackKey, Vector3 position) // attack spawner dedicated to tutorial instance
     {
         GameObject attackObj = AttackPoolManager.Instance.SpawnFromPool(attackKey, position, Quaternion.identity);
         if (!attackObj) return;
@@ -216,7 +216,7 @@ public class TutorialManager : MonoBehaviour
             attack.InitAttack(GameObject.FindGameObjectWithTag("Player")?.transform);
     }
     
-    private IEnumerator SmoothTimeScale(float start, float end, float duration)
+    private IEnumerator SmoothTimeScale(float start, float end, float duration) // lerp function to start and stop time smoothly
     {
         float t = 0f;
         while (t < duration)
@@ -233,13 +233,8 @@ public class TutorialManager : MonoBehaviour
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
     }
     
-    private float EaseOut(float t)
+    private float EaseOut(float t) // easeout function
     {
         return t * (2f - t);
-    }
-    
-    public void OnPlayerTutorialInput()
-    {
-        inputReceived = true;
     }
 }

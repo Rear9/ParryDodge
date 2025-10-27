@@ -40,6 +40,13 @@ public class LineSweep : EnemyAttackCore, IEnemyAttack
                 health.TakeDamage(stats.damage > 0f ? stats.damage : 1f);
             }
         }
+        else if (layer == LayerMask.NameToLayer("PlayerDodge"))
+
+        {
+            if (_playerHit) return;
+            _playerHit = true;
+            StatsManager.Instance.RecordDodge();
+        }
         
         // ignore self-collisions and other neutrals
         if (CompareTag("NeutralAttack")) return;
