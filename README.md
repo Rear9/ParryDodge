@@ -2,6 +2,8 @@
 
 **2D Action Arcade Bullet-hell with seeded enemy attacks + scaling**
 
+**Itch:** _https://rear9.itch.io/parrydodge_
+
 ## **Controls** (**PC/XBOX/PS5**)
 
 ### Move - WASD/Analog
