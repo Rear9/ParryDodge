@@ -71,7 +71,6 @@ public class PlayerHealth : MonoBehaviour
         {
             string currentWave = _ui != null ? _ui.GetCurrentWaveName() : "N/A";
             StatsManager.Instance.RecordDeath(currentWave);
-            StatsManager.Instance.RecordFull(currentWave);
         }
         
         // Return to menu after death

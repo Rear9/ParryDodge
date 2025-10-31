@@ -1,32 +1,33 @@
 using UnityEngine;
 using Unity.Services.Core;
-using Unity.Services.Analytics;
+using Abertay.Analytics;
 using System.Collections.Generic;
 using System;
-using System.Threading.Tasks;
 
 [System.Serializable]
 public class PlayerStats
 {
-    public int totalDeaths = 0;
-    public int totalCompletions = 0;
+    public string gameState = "Play";
+    public int totalDeaths;
+    public int totalCompletions;
     public string lastWaveDiedOn = "";
-    public int totalParries = 0;
-    public int totalDodges = 0;
+    public int totalParries;
+    public int totalDodges;
 }
 
 public class StatsManager : MonoBehaviour
 {
     public static StatsManager Instance { get; private set; }
-
     private PlayerStats _stats;
-    private float _sessionStartTime;
+    private UIManager _ui;
     private const string TutorialKey = "TutorialCompleted";
-    private const string DeathsKey = "TotalDeaths";
+    private const string PlayerIdKey = "PlayerID";
+    private const string StatsKey = "PlayerStats";
+    private string _playerID;
 
     public bool replayTutorial = false;
 
-    private async void Awake()
+    private void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -36,98 +37,97 @@ public class StatsManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        await InitializeAnalytics();
-        LoadLocalStats();
-        _sessionStartTime = Time.time;
+        // Load or create persistent stats
+        if (PlayerPrefs.HasKey(StatsKey))
+            _stats = JsonUtility.FromJson<PlayerStats>(PlayerPrefs.GetString(StatsKey));
+        else
+            _stats = new PlayerStats();
+
+        // Load or create persistent player ID
+        if (!PlayerPrefs.HasKey(PlayerIdKey))
+            PlayerPrefs.SetString(PlayerIdKey, Guid.NewGuid().ToString());
+        _playerID = PlayerPrefs.GetString(PlayerIdKey);
+
+        _ui = FindFirstObjectByType<UIManager>();
+        AnalyticsManager.Initialise("v0.5");
     }
 
-    private async Task InitializeAnalytics()
+    private void OnApplicationPause(bool pause)
     {
-        try
+        if (pause && _ui != null)
         {
-            await UnityServices.InitializeAsync();
-            AnalyticsService.Instance.StartDataCollection();
+            _stats.gameState = "Paused/Closing";
+            RecordFull(_ui.GetCurrentWaveName());
+            SaveStats();
         }
-        catch (Exception e)
-        {
-            Debug.LogWarning($"Analytics init failed: {e.Message}");
-        }
-    }
-
-    private void OnApplicationQuit() => SaveLocalStats();
-    private void OnApplicationPause(bool pauseStatus) { if (pauseStatus) SaveLocalStats(); }
-
-    // --- Local storage for tutorial + total deaths ---
-    private void LoadLocalStats()
-    {
-        _stats = new PlayerStats();
-
-        if (PlayerPrefs.HasKey(DeathsKey))
-            _stats.totalDeaths = PlayerPrefs.GetInt(DeathsKey);
-    }
-
-    private void SaveLocalStats()
-    {
-        PlayerPrefs.SetInt(DeathsKey, _stats.totalDeaths);
-        PlayerPrefs.Save();
     }
 
     // --- tutorial ---
-    public bool ShouldPlayTutorial() => !PlayerPrefs.HasKey(TutorialKey) || replayTutorial; // use in tutorialmanager
+    public bool ShouldPlayTutorial() => !PlayerPrefs.HasKey(TutorialKey) || replayTutorial;
 
-    public void CompleteTutorial() // use in tutorialmanager
+    public void CompleteTutorial()
     {
         PlayerPrefs.SetInt(TutorialKey, 1);
         PlayerPrefs.Save();
         replayTutorial = false;
     }
 
-    // --- general stats (local + analytics) ---
+    // --- general stats ---
     public void RecordFull(string waveName)
     {
-        SaveLocalStats();
-
         var parameters = new Dictionary<string, object>
         {
+            { "player_id", _playerID },
+            { "time", Time.time },
+            { "game_state", _stats.gameState},
             { "wave_name", waveName },
             { "total_deaths", _stats.totalDeaths },
             { "total_parries", _stats.totalParries },
             { "total_dodges", _stats.totalDodges },
             { "total_completions", _stats.totalCompletions }
         };
-        AnalyticsService.Instance.RecordEvent("player_stats", parameters);
-        foreach (var key in parameters.Keys)
-        {
-            print($"Key: {key} -  Value: {parameters[key]}");
-        }
-        AnalyticsService.Instance.Flush();
 
+        foreach (var key in parameters.Keys)
+            print($"Key: {key} -  Value: {parameters[key]}");
+
+        AnalyticsManager.SendCustomEvent("Stats", parameters);
+        StartCoroutine(GlobalStatLogger.SendToGoogleSheet(parameters));
+    }
+
+    private void SaveStats()
+    {
+        string json = JsonUtility.ToJson(_stats);
+        PlayerPrefs.SetString(StatsKey, json);
+        PlayerPrefs.Save();
     }
 
     // --- stat increments ---
     public void RecordParry()
     {
         _stats.totalParries++;
-        print($"Parries: {_stats.totalParries}");
+        SaveStats();
     }
 
     public void RecordDodge()
     {
         _stats.totalDodges++;
-        print($"Dodges: {_stats.totalDodges}");
+        SaveStats();
     }
 
     public void RecordCompletion()
     {
         _stats.totalCompletions++;
-        print($"Completions: {_stats.totalCompletions}");
+        SaveStats();
+        RecordFull(_ui != null ? _ui.GetCurrentWaveName() : "Unknown");
     }
 
     public void RecordDeath(string waveName)
     {
         _stats.totalDeaths++;
+        _stats.gameState = "Death";
         _stats.lastWaveDiedOn = waveName;
-        print($"Deaths: {_stats.totalDeaths}, died on wave: {waveName}");
+        SaveStats();
+        RecordFull(waveName);
     }
 
     public PlayerStats GetStats() => _stats;
